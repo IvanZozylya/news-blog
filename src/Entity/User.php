@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity(fields="email", message="Email already taken")
  */
-class User implements UserInterface
+class User implements UserInterface, \Serializable
 {
     /**
      * @ORM\Id
@@ -120,7 +120,33 @@ class User implements UserInterface
         // Вам *может* понадобиться настоящая соль, если вы выберете другой кодировшик.
         return null;
     }
-    public function getRoles(){}
+    public function getRoles(){
+        return [
+            'ROLE_USER'
+        ];
+    }
     public function eraseCredentials(){}
+
+    public function serialize()
+    {
+        return serialize([
+            $this->id,
+            $this->username,
+            $this->surname,
+            $this->email,
+            $this->password,
+        ]);
+    }
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            $this->username,
+            $this->surname,
+            $this->email,
+            $this->password,
+            ) = unserialize($serialized,['allow_classes' => false]);
+    }
+
 
 }
