@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Login!{% endblock %}
+{% block title %}Sing in!{% endblock %}
 
 {% block body %}
 <style>
@@ -17,10 +17,11 @@
         <span class="error">{{ error.messageKey }}</span>
     {% endif %}
     <form action="{{ path('login') }}" method="POST">
-        <input type="text" name="_username" value="{{ lastUserName }}" placeholder="Username here..">
+        <input type="text" name="_username" value="{{ last_username }}" placeholder="Username here..">
         <input type="password" name="_password">
         <button type="submit">Login</button>
     </form>
-
+    <span>Do you need registration?</span>
+    <a href="{{ path('user_registration') }}">Sign up</a>
 </div>
 {% endblock %}

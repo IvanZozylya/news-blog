@@ -13,18 +13,18 @@
 
     This friendly message is coming from:
     <ul>
-        <li>Your controller at <code><a href="{{ 'src/Controller/UserController.php'|file_link(0) }}">src/Controller/UserController.php</a></code></li>
-        <li>Your template at <code><a href="{{ 'templates/user/register.html.twig'|file_link(0) }}">templates/user/register.html.twig</a></code></li>
+        <li>Your controller at <code><a href="{{ 'src/Controller/SecurityController.php.php'|file_link(0) }}">src/Controller/UserController.php</a></code></li>
+        <li>Your template at <code><a href="{{ 'templates/security/register.html.twig'|file_link(0) }}">templates/user/register.html.twig</a></code></li>
     </ul>
 
     {{ form_start(form) }}
     {{ form_row(form.username) }}
-    {{ form_row(form.surname) }}
+    {{ form_row(form.fullName) }}
     {{ form_row(form.email) }}
     {{ form_row(form.password) }}
 
 
-    <button type="submit">Register!</button>
+    <button type="submit" class="btn btn-success">Register!</button>
     {{ form_end(form) }}
 </div>
 {% endblock %}

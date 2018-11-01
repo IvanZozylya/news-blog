@@ -9,49 +9,74 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Table(name="users")
  * @UniqueEntity(fields="email", message="Email already taken")
+ * @UniqueEntity(fields="username", message="Username already taken")
  */
 class User implements UserInterface, \Serializable
 {
     /**
+     * @var int
+     *
      * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var string
+     *
+     * @ORM\Column(type="string")
      * @Assert\NotBlank()
+     */
+    private $fullName;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", unique=true)
+     * @Assert\NotBlank()
+     * @Assert\Length(min=2, max=50)
      */
     private $username;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\NotBlank()
-     */
-    private $surname;
-
-    /**
-     * @ORM\Column(type="string", length=255,unique=true)
-     * @Assert\NotBlank()
+     * @var string
+     *
+     * @ORM\Column(type="string", unique=true,length=255)
      * @Assert\Email()
      */
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=64)
+     * @var string
+     *
+     * @ORM\Column(type="string")
      */
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var array
+     *
+     * @ORM\Column(type="json")
      */
-    private $img_src;
+    private $roles = [];
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
+    }
+
+    public function setFullName(string $fullName): self
+    {
+        $this->fullName = $fullName;
+        return $this;
+    }
+
+    public function getFullName(): ?string
+    {
+        return $this->fullName;
     }
 
     public function getUsername(): ?string
@@ -62,19 +87,6 @@ class User implements UserInterface, \Serializable
     public function setUsername(string $username): self
     {
         $this->username = $username;
-
-        return $this;
-    }
-
-    public function getSurname(): ?string
-    {
-        return $this->surname;
-    }
-
-    public function setSurname(string $surname): self
-    {
-        $this->surname = $surname;
-
         return $this;
     }
 
@@ -98,55 +110,69 @@ class User implements UserInterface, \Serializable
     public function setPassword(string $password): self
     {
         $this->password = $password;
-
         return $this;
     }
 
-    public function getImgSrc(): ?string
+    /**
+     * Returns the roles or permissions granted to the user for security.
+     */
+    public function getRoles(): array
     {
-        return $this->img_src;
+        $roles = $this->roles;
+
+        // guarantees that a user always has at least one role for security
+        if (empty($roles)) {
+            $roles[] = 'ROLE_USER';
+        }
+
+        return array_unique($roles);
     }
 
-    public function setImgSrc(string $img_src): self
+    public function setRoles(array $roles): void
     {
-        $this->img_src = $img_src;
-
-        return $this;
+        $this->roles = $roles;
     }
 
-    public function getSalt()
+    /**
+     * Returns the salt that was originally used to encode the password.
+     *
+     * {@inheritdoc}
+     */
+    public function getSalt(): ?string
     {
-        // Алгоритмы bcrypt и argon2i не требуют отдельной соли.
-        // Вам *может* понадобиться настоящая соль, если вы выберете другой кодировшик.
+        // See "Do you need to use a Salt?" at https://symfony.com/doc/current/cookbook/security/entity_provider.html
+        // we're using bcrypt in security.yml to encode the password, so
+        // the salt value is built-in and you don't have to generate one
+
         return null;
     }
-    public function getRoles(){
-        return [
-            'ROLE_USER'
-        ];
-    }
-    public function eraseCredentials(){}
 
-    public function serialize()
+    /**
+     * Removes sensitive data from the user.
+     *
+     * {@inheritdoc}
+     */
+    public function eraseCredentials(): void
     {
-        return serialize([
-            $this->id,
-            $this->username,
-            $this->surname,
-            $this->email,
-            $this->password,
-        ]);
+        // if you had a plainPassword property, you'd nullify it here
+        // $this->plainPassword = null;
     }
-    public function unserialize($serialized)
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serialize(): string
     {
-        list (
-            $this->id,
-            $this->username,
-            $this->surname,
-            $this->email,
-            $this->password,
-            ) = unserialize($serialized,['allow_classes' => false]);
+        // add $this->salt too if you don't use Bcrypt or Argon2i
+        return serialize([$this->id, $this->username, $this->password]);
     }
 
-
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($serialized): void
+    {
+        // add $this->salt too if you don't use Bcrypt or Argon2i
+        [$this->id, $this->username, $this->password] = unserialize($serialized, ['allowed_classes' => false]);
+    }
 }

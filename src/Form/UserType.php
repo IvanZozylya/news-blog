@@ -15,18 +15,15 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 
 
-class UserRegister extends AbstractType
+class UserType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('email', EmailType::class)
             ->add('username', TextType::class)
-            ->add('surname', TextType::class)
-            ->add('password', PasswordType::class)
-            ->add('imgSrc', HiddenType::class,array(
-                'data' => 'default.png'
-            ));
+            ->add('fullName', TextType::class)
+            ->add('password', PasswordType::class);
 
 
 
